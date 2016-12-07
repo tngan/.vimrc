@@ -11,6 +11,9 @@ set runtimepath^=~/.vim/bundle/ctrlp.vim
 """"""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
 
+" ctrlp
+Plug 'tacahiroy/ctrlp-funky'
+
 " scheme
 Plug 'morhetz/gruvbox'
 
@@ -124,10 +127,13 @@ let mapleader = "\<Space>"
 " plugin shortcut
 nnoremap <Leader>i :PlugInstall<Cr>
 nnoremap <Leader>n :NERDTreeToggle<Cr>
+nnoremap <Leader>p :CtrlP<Cr>
 
 " basic control: shift buffers
 nnoremap <Tab> :bnext<CR>
 nnoremap <S-Tab> :bprevious<CR>
+nnoremap <S-d> :bdelete<CR>
+nnoremap <S-w> :w\|bdelete<CR>
 
 
 """"""""""""""""""""""""
