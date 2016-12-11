@@ -1,10 +1,7 @@
 set nocompatible              " be iMproved, required
-filetype off                  " required
-
-" Plugin 'othree/yajs.vim'
-" Plugin 'slashmili/alchemist.vim'
 
 set runtimepath^=~/.vim/bundle/ctrlp.vim
+set mouse=                    " use mouse to copy
 
 """"""""""""""""""""""""
 " plug definition
@@ -31,16 +28,16 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 
 " langs
-"Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
-Plug 'mhartington/deoplete-typescript'
-Plug 'jason0x43/vim-js-indent'
-Plug 'leafgarland/typescript-vim'
 Plug 'jelera/vim-javascript-syntax'
-Plug 'mxw/vim-jsx'
+Plug 'sheerun/vim-polyglot'
 
 " others
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+Plug 'jiangmiao/auto-pairs'
+Plug 'alvan/vim-closetag'
+Plug 'neomake/neomake'
+
 
 """"""""""""""""""""""""
 " setting
@@ -60,12 +57,10 @@ set numberwidth=4
 
 colorscheme gruvbox
 
-" solarized.vim
-
-" ignore wildcard
-" checkout global agignore setting for ctrlp in ~/.agignore
-
-" keymapping
+" syntax
+"
+" - from typescript-vim
+let g:neomake_typescript_enabled_makers = ['tsc']
 
 " ctrl p
 let g:ctrlp_user_command = 'ag %s -l --nocolor --hidden -g ""'
@@ -111,7 +106,6 @@ let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 
 set background=dark
-let g:gruvbox_termcolors=16
 
 " ag
 let g:ctrlp_working_path_mode = 'ra'
@@ -128,6 +122,9 @@ let mapleader = "\<Space>"
 nnoremap <Leader>i :PlugInstall<Cr>
 nnoremap <Leader>n :NERDTreeToggle<Cr>
 nnoremap <Leader>p :CtrlP<Cr>
+nnoremap <Leader>f :CtrlPFunky<Cr>
+" narrow the list down with a word under cursor
+nnoremap <Leader>w :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 
 " basic control: shift buffers
 nnoremap <Tab> :bnext<CR>
@@ -135,6 +132,29 @@ nnoremap <S-Tab> :bprevious<CR>
 nnoremap <S-d> :bdelete<CR>
 nnoremap <S-w> :w\|bdelete<CR>
 
+
+""""""""""""""""""""""""
+" tricks - reload vimrc on save
+""""""""""""""""""""""""
+if has("autocmd")
+
+  au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+  au! BufWritePost,FileWritePost * Neomake
+
+endif
+
+nnoremap <Leader>r :w<CR>\| :so %<CR>
+
+"""""""""""""""""""""""
+" pyenv configuration
+"""""""""""""""""""""""
+"
+"let g:python_version = `python -c 'import sys; print(".".join(map(str, sys.version_info[:1])))'`
+"if g:python_version =~3
+"  let g:python2_host_prog = `which python`
+"else
+"  let g:python3_host_prog = `which python3`
+"endif
 
 """"""""""""""""""""""""
 " debugging
