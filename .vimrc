@@ -1,7 +1,9 @@
-set nocompatible              " be iMproved, required
+" set nocompatible              " be iMproved, required
 
-set runtimepath^=~/.vim/bundle/ctrlp.vim
+" set runtimepath^=~/.vim/bundle/ctrlp.vim
+set rtp+=/usr/local/opt/fzf
 set mouse=                    " use mouse to copy
+set completeopt-=preview      " remove preview window
 
 """"""""""""""""""""""""
 " plug definition
@@ -9,7 +11,7 @@ set mouse=                    " use mouse to copy
 call plug#begin('~/.vim/plugged')
 
 " ctrlp
-Plug 'tacahiroy/ctrlp-funky'
+" Plug 'tacahiroy/ctrlp-funky'
 
 " scheme
 Plug 'morhetz/gruvbox'
@@ -17,7 +19,7 @@ Plug 'morhetz/gruvbox'
 " autocomplete
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 
-" silver searcher
+" searcher
 Plug 'mileszs/ack.vim'
 
 " git
@@ -27,21 +29,26 @@ Plug 'airblade/vim-gitgutter'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+
 " langs
 Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
-Plug 'jelera/vim-javascript-syntax'
 Plug 'sheerun/vim-polyglot'
+" Plug 'mhartington/deoplete-typescript'
 
 " others
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 Plug 'jiangmiao/auto-pairs'
 Plug 'alvan/vim-closetag'
 Plug 'neomake/neomake'
-
+Plug 'KabbAmine/vCoolor.vim'
 
 """"""""""""""""""""""""
 " setting
 """"""""""""""""""""""""
+
+" enable deoplete
+let g:deoplete#enable_at_startup = 1
 
 call plug#end()
 
@@ -59,23 +66,18 @@ colorscheme gruvbox
 
 " syntax
 "
-" - from typescript-vim
-let g:neomake_typescript_enabled_makers = ['tsc']
 
-" ctrl p
-let g:ctrlp_user_command = 'ag %s -l --nocolor --hidden -g ""'
+" html auto close tag
+" =====
+let g:closetag_filenames = "*.jsx,*.html,*.phtml"
 
 " nerdtree
 "
 """""" close only remain nerdtree
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
-" enable deoplete
-let g:deoplete#enable_at_startup = 1
-
-" Use deoplete.
-let g:tern_request_timeout = 1
-let g:tern_show_signature_in_pum = '0'  " This do disable full signature type on autocomplete
+"let g:tern_request_timeout = 1
+"let g:tern_show_signature_in_pum = '0'  " This do disable full signature type on autocomplete
 
 " airline
 let g:airline_powerline_fonts = 1
@@ -113,50 +115,71 @@ if executable('ag')
   let g:ackprg = 'ag --vimgrep'
 endif
 
+" neomake
+"
+let g:neomake_javascript_enabled_makers = ['eslint']
+let g:neomake_typescript_enabled_makers = ['tsc', 'tslint']
+let g:neomake_typescript_tsc_maker = {
+    \ 'args': ['--project', 'tsconfig.json'] }
+
+nmap <Leader>o :lopen<CR>
+
 """"""""""""""""""""""""
 " key map
 """"""""""""""""""""""""
 let mapleader = "\<Space>"
 
 " plugin shortcut
-nnoremap <Leader>i :PlugInstall<Cr>
-nnoremap <Leader>n :NERDTreeToggle<Cr>
-nnoremap <Leader>p :CtrlP<Cr>
-nnoremap <Leader>f :CtrlPFunky<Cr>
+nmap <Leader>pi :PlugInstall<Cr>
+nmap <Leader>pc :PlugClean<Cr>
+nmap <Leader>pu :PlugUpdate<Cr>
+
+nmap <Leader>n :NERDTreeToggle<Cr>
+"nmap <Leader>p :CtrlP<Cr>
+"nmap <Leader>f :CtrlPFunky<Cr>
+nmap <Leader>p :FZF<Cr>
 " narrow the list down with a word under cursor
-nnoremap <Leader>w :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+nmap <Leader>w :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 
 " basic control: shift buffers
-nnoremap <Tab> :bnext<CR>
-nnoremap <S-Tab> :bprevious<CR>
-nnoremap <S-d> :bdelete<CR>
-nnoremap <S-w> :w\|bdelete<CR>
+nmap <Tab> :bnext<CR>
+nmap <S-Tab> :bprevious<CR>
+nmap <S-d> :bdelete<CR>
+nmap <S-w> :w\|bdelete<CR>
 
+" color picker
+nmap <Leader>c :VCoolor<CR>
+
+""""""""""""""""""""""""
+" deoplete
+""""""""""""""""""""""""
+let g:tern_request_timeout = 1
+let g:tern_show_signature_in_pum = '1'  " This do disable full signature type on autocomplete
 
 """"""""""""""""""""""""
 " tricks - reload vimrc on save
 """"""""""""""""""""""""
 if has("autocmd")
 
+  " cursor back to the location when quit
   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-  au! BufWritePost,FileWritePost * Neomake
+  au GUIEnter * set visualbell t_vb=
+  autocmd! BufWritePost,BufEnter * Neomake
 
 endif
 
-nnoremap <Leader>r :w<CR>\| :so %<CR>
+"""""""""""""""""""""""
+" neomake configuration
 
-"""""""""""""""""""""""
-" pyenv configuration
-"""""""""""""""""""""""
-"
-"let g:python_version = `python -c 'import sys; print(".".join(map(str, sys.version_info[:1])))'`
-"if g:python_version =~3
-"  let g:python2_host_prog = `which python`
-"else
-"  let g:python3_host_prog = `which python3`
-"endif
+nmap <Leader>r :w<CR>\| :so %<CR>
+
+"""""""""""""""""""""
+" disable beep
+""
+set noerrorbells visualbell t_vb=
 
 """"""""""""""""""""""""
 " debugging
 """"""""""""""""""""""""
 " let g:ctrlp_show_hidden = :echo has("python3")
+" let g:neomake_verbose=3
