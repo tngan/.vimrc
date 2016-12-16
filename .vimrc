@@ -1,30 +1,29 @@
-" set nocompatible              " be iMproved, required
+set nocompatible
+
 """"""""""""""""""""""""
 " plug definition
 """"""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
 
-" scheme
-Plug 'morhetz/gruvbox'
+" Plug 'neomake/neomake'
 
 " autocomplete
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-
-" searcher
-Plug 'mileszs/ack.vim'
+Plug 'morhetz/gruvbox'
 
 " git
 Plug 'airblade/vim-gitgutter'
+Plug 'neomake/neomake'
 
 " theme
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+Plug 'sheerun/vim-polyglot'
 
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
 " langs
-Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
-Plug 'sheerun/vim-polyglot'
+Plug 'carlitux/deoplete-ternjs'
 Plug 'mhartington/deoplete-typescript'
 
 " others
@@ -37,6 +36,7 @@ Plug 'KabbAmine/vCoolor.vim'
 call plug#end()
 
 syntax enable
+
 set rtp+=/usr/local/opt/fzf
 set cursorline
 set tabstop=2       
@@ -46,23 +46,24 @@ set expandtab       " Expand TABs to spaces
 set noshowmode 
 set number
 set numberwidth=4
-set background=dark " set gruvbox theme
 set mouse=                    " use mouse to copy
+set background=dark
 set completeopt-=preview      " remove preview window
-set noerrorbells visualbell t_vb= " disable beep sound
+
+" set noerrorbells visualbell t_vb= " disable beep sound
+
+" set guifont=Source\ Code\ Pro\ Light:h13
 
 colorscheme gruvbox
+let g:gruvbox_contrast_dark = "hard"
 
 " syntax
 "
 " html auto close tag
-" =====
 let g:closetag_filenames = "*.jsx,*.html,*.phtml"
-""""""""""""""""""""""""
+
 " deoplete
 """"""""""""""""""""""""
-" enable deoplete
-let g:deoplete#enable_at_startup = 1
 let g:tern_request_timeout = 1
 let g:tern_show_signature_in_pum = '1'  " This do disable full signature type on autocomplete
 
@@ -94,13 +95,29 @@ let g:airline_symbols.branch = ''
 let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 
-
 " neomake
 "
-let g:neomake_javascript_enabled_makers = ['eslint']
-let g:neomake_typescript_enabled_makers = ['tsc', 'tslint']
-let g:neomake_typescript_tsc_maker = {
-    \ 'args': ['--project', 'tsconfig.json'] }
+autocmd! BufWritePost * Neomake
+
+let g:neomake_javascript_enabled_makers = ['eslint_d']
+let g:neomake_jsx_enabled_makers = ['eslint_d']
+let g:neomake_typescript_enabled_makers = ['tsc']
+
+let g:neomake_highlight_lines = 1
+let g:neomake_open_list = 2
+let g:neomake_list_height = 6
+let g:neomake_logfile='/tmp/neomake.log'
+
+" deoplete
+" =============
+let g:deoplete#enable_at_startup = 1
+let g:tern_request_timeout = 1
+let g:tern_show_signature_in_pum = '1'  " This do disable full signature type on autocomplete
+let g:tern#filetypes = [
+    \ 'jsx',
+    \ 'javascript.jsx'
+    \ ]
+
 
 """"""""""""""""""""""""
 " key map
@@ -108,8 +125,8 @@ let g:neomake_typescript_tsc_maker = {
 let mapleader = "\<Space>"
 
 " plugin shortcut
-nmap <Leader>pi :PlugInstall<Cr>
-nmap <Leader>pc :PlugClean<Cr>
+nmap <Leader>pi :w<CR> \| :so %<CR> \| :PlugInstall<Cr>
+nmap <Leader>pc :w<CR> \| :so %<CR> \| :PlugClean<Cr>
 nmap <Leader>pu :PlugUpdate<Cr>
 
 nmap <Leader>n :NERDTreeToggle<Cr>
@@ -129,6 +146,9 @@ nmap <Leader>c :VCoolor<CR>
 nmap <Leader>r :w<CR>\| :so %<CR>
 
 nmap <Leader>g :noh<CR>
+nmap <Leader>s :wq<CR>
+
+let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
 
 """"""""""""""""""""""""
 " au 
@@ -137,14 +157,27 @@ if has("autocmd")
 
   " cursor back to the location when quit
   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-  au GUIEnter * set visualbell t_vb=
+  " au GUIEnter * set visualbell t_vb=
   au bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif " close only remain nerdtree
-  autocmd! BufWritePost,BufEnter * Neomake
 
 endif
 
+filetype plugin indent on
+syntax on
+
 """"""""""""""""""""""""
-" debugging
+" debugging && tips
+"
+" c-v I <Something> Esc : Multiple line comment
+"
 """"""""""""""""""""""""
 " let g:ctrlp_show_hidden = :echo has("python3")
 " let g:neomake_verbose=3
+"
+" let g:deoplete#enable_ignore_case = 1
+" let g:deoplete#auto_complete_start_length = 0
+" let g:auto_complete_start_length = 0
+" let g:deoplete#enable_refresh_always = 1
+" let g:deoplete#enable_debug = 1
+" let g:deoplete#enable_profile = 1
+" call deoplete#enable_logging('DEBUG', 'deoplete.log')
